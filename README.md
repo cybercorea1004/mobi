@@ -1,0 +1,2 @@
+# mobi
+mobi maven repository
