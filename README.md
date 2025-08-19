@@ -45,11 +45,11 @@
 - com.emobi.emobi-egov
 (egovment framework application) : 전자 정부 프레임웍 컴포넌트 활용 구성<br>
 
-- com.emobi.emobi-redis
-(emobi-redis) : 비동기 토픽 교환을 통한 인터페이스 레파지토리 활용<br>
-
 - com.emobi.emobi-mqtt
 (emobi mqtt) : 동기 토픽 교환을 통한 인터페이스 레파지토리 활용 <br>
+
+- com.emobi.emobi-redis
+(emobi-redis) : 비동기 토픽 교환을 통한 인터페이스 레파지토리 활용<br>
 
 - com.emobi.emobi-socket
 (socket) : 인터페이스 소켓 통신<br>
