@@ -132,6 +132,61 @@
 	      on-profile: local
 	  main:
 	    banner-mode: off
+    ---
+	spring:
+	  config:
+	    activate:
+	      on-profile: dev
+	  main:
+	    banner-mode: off
+    ---
+	spring:
+	  config:
+	    activate:
+	      on-profile: prod
+	  main:
+	    banner-mode: off
+    ```
+    - slf4j(logback-spring.xml)
+    ```slf4j
+	<configuration scan="true" scanPeriod="30 seconds">
+		<springProperty scope="context" name="springAppName"
+			source="spring.application.name" defaultValue="logdemo" />
+	
+		<!-- 콘솔 공통 패턴 -->
+		<property name="CONSOLE_PATTERN"
+			value="[%d{yyyy-MM-dd HH:mm:ss}] [%thread] %-5level %logger{36} - %msg%n" />
+	
+		<!-- 환경별 분기 -->
+		<springProfile name="local">
+			<include resource="logback-local.xml" />
+		</springProfile>
+		<springProfile name="dev">
+			<include resource="logback-dev.xml" />
+		</springProfile>
+	
+		<springProfile name="prod">
+			<include resource="logback-prod.xml" />
+		</springProfile>
+    </configuration>
+    ```
+    - logback-local.xml(예제)
+    ```logback-local
+	<configuration>
+	    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+	        <encoder>
+	            <pattern>${CONSOLE_PATTERN}</pattern>
+	        </encoder>
+	    </appender>
+	
+	<!-- 패키지별 로그 레벨 설정 -->
+	    <logger name="com.emobi" level="DEBUG" />
+	    <logger name="org.springframework" level="INFO" />
+	    
+	    <root level="WARN">
+	        <appender-ref ref="CONSOLE"/>
+	    </root>
+    </configuration>
     ```
 	- dependency
     ```dependency
