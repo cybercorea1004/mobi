@@ -5,6 +5,7 @@
 공통 프레임웍팀에서 제공되는 API를 기반으로 사용할 수 있도록 가이드하고 표준화하는데 사용됩니다. <br><br>
 주요 콤포넌트 : <br>
 
+./images/emobi_framework.png
 - com.emobi.emobi-common
 (common util) : 공통으로 사용되는 util 및 interface 구성 <br>
 
