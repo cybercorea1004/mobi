@@ -66,9 +66,6 @@
 - com.emobi.emobi-nettyserver
 (emobi netty server) : 비동기 인터페이스 서비스를 위한 Netty Server<br>
 
-- com.emobi.emobi-netty
-(emobi netty) : 비동기 인터페이스 서비스를 위한 Netty Client<br>
-
 - com.emobi.emobi-mongo
 (emobi-mongo) : MongoDB 데이터베이스<br>
 
@@ -78,10 +75,13 @@
 - com.emobi.emobi-ems-service : EMS 서비스 비지니스 예제<br>
 
 - com.emobi.emobi-ems-mgmt
-(emobi-ems-mgmt) : 관리자 서비스 예제<br>
+(emobi-ems-mgmt) : 관리자 서비스<br>
 
 - com.emobi.emobi-ems-user
-(emobi-ems-user) : 사용자 서비스 예제<br>
+(emobi-ems-user) : 사용자 서비스<br>
+
+- com.emobi.emobi-ems-example
+(emobi-ems-example) : 사용자 서비스 예제<br>
 
 - com.emobi.emobi-report
 (emobi-report) : 보고서 관리<br>
