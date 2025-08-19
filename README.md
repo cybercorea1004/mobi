@@ -132,13 +132,22 @@
 	      on-profile: local
 	  main:
 	    banner-mode: off
+        data:
+      mongodb:
+        uri: mongodb://{user_name}:{user_pass}@{mongodb_ip}:{mongodb_port}/{database_name}
+    server:
+  		port: {server_port}
     ---
 	spring:
 	  config:
 	    activate:
 	      on-profile: dev
 	  main:
-	    banner-mode: off
+	  	banner-mode: off
+      mongodb:
+        uri: mongodb://{user_name}:{user_pass}@{mongodb_ip}:{mongodb_port}/{database_name}
+    server:
+  		port: {server_port}
     ---
 	spring:
 	  config:
@@ -146,6 +155,10 @@
 	      on-profile: prod
 	  main:
 	    banner-mode: off
+      mongodb:
+        uri: mongodb://{user_name}:{user_pass}@{mongodb_ip}:{mongodb_port}/{database_name}
+    server:
+  		port: {server_port}
     ```
     - slf4j(logback-spring.xml)
     ```slf4j
@@ -196,3 +209,4 @@
 		<version>0.0.1</version>
 	</dependency>
      ```
+   나. emobi-scheduler(공통모듈)
