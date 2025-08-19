@@ -492,3 +492,80 @@
 	    ]
 	}
     ```
+  마. emobi-menu(메뉴 관리)
+	 - dependency
+	 ```xml
+	<dependency>
+		<groupId>com.emobi</groupId>
+		<artifactId>emobi-menu</artifactId>
+		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
+	</dependency>
+	 ```
+	 - Controller 예제
+	```java
+
+	package com.emobi.ems;
+
+
+	import java.util.List;
+	
+	import org.springframework.web.bind.annotation.PathVariable;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import com.emobi.common.vo.Menu;
+	import com.emobi.user.menu.service.MenuService;
+	
+	import lombok.RequiredArgsConstructor;
+	
+	
+	@RequiredArgsConstructor
+	@RestController
+	@RequestMapping("/menus")
+	public class MenuController {
+	
+	 
+	    private final MenuService menuService;
+	
+	    @PostMapping("/create")
+	    public Menu createMenu(@RequestBody Menu menu) {
+	        return menuService.createMenu(menu);
+	    }
+	
+	    @PostMapping("/get/{id}")
+	    public Menu getMenu(@PathVariable String id) {
+	        return menuService.getMenu(id).orElseThrow(() -> new RuntimeException("Menu not found"));
+	    }
+	
+	    @PostMapping("/plist/{parentId}")
+	    public List<Menu> getMenusByParentId(@PathVariable String parentId) {
+	        return menuService.getMenusByParentId(parentId);
+	    }
+	
+	    @PostMapping("/all")
+	    public List<Menu> getAllMenus() {
+	        return menuService.getAllMenus();
+	    }
+	
+	    @PostMapping("/update/{id}")
+	    public Menu updateMenu(@PathVariable String id, @RequestBody Menu menu) {
+	        return menuService.updateMenu(id, menu);
+	    }
+	
+	    @PostMapping("/delete/{id}")
+	    public void deleteMenu(@PathVariable String id) {
+	        menuService.deleteMenu(id);
+	    }
+	}
+	```
+	- 메뉴 생성시 body(json) 예제
+    ```body
+	{
+	    "name":"test2",
+	    "path":"/test2",
+	    "order":"1",
+	    "parentId":"a0513cfe293849a9a5f54775df51f271" //루트 메뉴일 경우 생략
+	}
+    ```
