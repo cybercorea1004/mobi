@@ -340,9 +340,8 @@
 	    	if(userService.getUserByName(user.getUsername()).isPresent()) {
 	    		return ResponseEntity.badRequest().body("Username is already taken");
 	    	}
+	    	
 	    	// 권한 기본값 설정
-	        user.setRoles(Set.of("USER"));
-	     // 비밀번호 암호화 (아래 BCryptPasswordEncoder 사용 권장)
 	        user.setPassword(passwordEncoder.encode(user.getPassword()));
 	        User created = userService.createUser(user);
 	        return ResponseEntity.ok("User registered successfully");
@@ -381,8 +380,9 @@
 	- 사용자 생성시 body(json) 예제
     ```body
     {
-	    "username": "shin4",
+	    "username": "shin5",
 	    "email": "sunrise@emobi.kr",
-	    "password": "12345"
+	    "password": "12345",
+	    "roles": ["USER"]
 	}
     ```
