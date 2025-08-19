@@ -209,7 +209,7 @@
 		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
 	</dependency>
      ```
-   나. emobi-scheduler(공통모듈)
+   나. emobi-scheduler
      - dependency
      ```xml
 	<dependency>
@@ -294,4 +294,87 @@
 	    "methodName" : "print"
 	}
     ```
-    - ddd
+    나. emobi-member
+     - dependency
+     ```xml
+	<dependency>
+		<groupId>com.emobi</groupId>
+		<artifactId>emobi-member</artifactId>
+		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
+	</dependency>
+     ```
+     - Controller 예제
+    ```java
+
+	package com.emobi.ems;
+	
+	import java.util.List;
+	import java.util.Set;
+	
+	import org.springframework.http.ResponseEntity;
+	import org.springframework.security.crypto.password.PasswordEncoder;
+	import org.springframework.web.bind.annotation.PathVariable;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import com.emobi.common.vo.User;
+	import com.emobi.user.member.service.UserService;
+	
+	import lombok.RequiredArgsConstructor;
+	
+
+	@RequiredArgsConstructor
+	@RestController
+	@RequestMapping("/api/auth/users")
+	public class UserController {
+	
+	    private final UserService userService;
+	    private final PasswordEncoder passwordEncoder;
+	    
+	
+	    // 회원 생성
+	    @PostMapping("/create")
+	    public ResponseEntity<String> createUser(@RequestBody User user) {
+	    	if(userService.getUserByName(user.getUsername()).isPresent()) {
+	    		return ResponseEntity.badRequest().body("Username is already taken");
+	    	}
+	    	// 권한 기본값 설정
+	        user.setRoles(Set.of("USER"));
+	     // 비밀번호 암호화 (아래 BCryptPasswordEncoder 사용 권장)
+	        user.setPassword(passwordEncoder.encode(user.getPassword()));
+	        User created = userService.createUser(user);
+	        return ResponseEntity.ok("User registered successfully");
+	    }
+	
+	    // 전체 조회
+	    @PostMapping("/list")
+	    public ResponseEntity<List<User>> getAllUsers() {
+	        return ResponseEntity.ok(userService.getAllUsers());
+	    }
+	
+	    // ID로 조회
+	    @PostMapping("/user/{id}")
+	    public ResponseEntity<User> getUserById(@PathVariable String id) {
+	        return userService.getUserById(id)
+	                .map(ResponseEntity::ok)
+	                .orElse(ResponseEntity.notFound().build()); 
+	    }
+	
+	    // 수정
+	    @PostMapping("/update/{id}")
+	    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
+	        return userService.updateUser(id, user)
+	                .map(ResponseEntity::ok)
+	                .orElse(ResponseEntity.notFound().build());
+	    }
+	
+	    // 삭제
+	    @PostMapping("/delete/{id}")
+	    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+	        userService.deleteUser(id);
+	        return ResponseEntity.noContent().build();
+	    }
+	}
+	```
