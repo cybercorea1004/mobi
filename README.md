@@ -5,6 +5,38 @@
 공통 프레임웍팀에서 제공되는 API를 기반으로 사용할 수 있도록 가이드하고 표준화하는데 사용됩니다. <br><br>
 **FrameWork Archtecture 구성**<br>
 ![Alt Text](./emobi_framework.png)
+
+1. 기본(내부) 구성
+   - springboot(3.4.5)
+   - java(1.8)
+   
+   ex)설정 참조
+   ```xml
+   <parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.4</version>
+	</parent>
+	<groupId>com.emobi</groupId>
+	<artifactId>e-mobi</artifactId>
+	<version>0.0.1</version>
+	<packaging>pom</packaging>
+	<name>mobi framework parent</name>
+	<description>mobi framework parent</description>
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/cybercorea1004/mobi</url>
+		</repository>
+	</distributionManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+   ```
 **주요 콤포넌트 구성**<br>
 
 - com.emobi.emobi-common
