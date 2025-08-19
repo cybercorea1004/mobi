@@ -225,109 +225,63 @@
        : web 실행시 자동 실행됨
      - Controller 예제
     ```java
-	import java.util.Date;
+	package com.emobi.ems;
+
 	import java.util.List;
-	import java.util.Map;
-	import java.util.Optional;
-	import java.util.concurrent.ConcurrentHashMap;
-	import java.util.concurrent.ScheduledFuture;
 	
-	import org.springframework.context.ApplicationContext;
-	import org.springframework.scheduling.TaskScheduler;
-	import org.springframework.scheduling.support.CronTrigger;
-	import org.springframework.stereotype.Service;
+	import org.springframework.http.ResponseEntity;
+	import org.springframework.web.bind.annotation.PathVariable;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
 	
 	import com.emobi.common.vo.ScheduledTask;
 	import com.emobi.scheduler.repository.ScheduledTaskRepository;
+	import com.emobi.scheduler.service.DynamicSchedulerService;
 	
-	import jakarta.annotation.PostConstruct;
 	import lombok.RequiredArgsConstructor;
 	
 	@RequiredArgsConstructor
-	@Service
-	public class DynamicSchedulerService {
+	@RestController
+	@RequestMapping("/api/scheduler")
+	public class SchedulerController {
 	
-		private final ScheduledTaskRepository taskRepository;
-		private final TaskScheduler taskScheduler;
-		private final ApplicationContext applicationContext;
-		private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+	    private final ScheduledTaskRepository taskRepository;
+	    private final DynamicSchedulerService schedulerService;
 	
-		@PostConstruct
-		public void init() {
-			List<ScheduledTask> tasks = taskRepository.findByEnabledTrue();
-			for (ScheduledTask task : tasks) {
-				scheduleTask(task);
-			}
-		}
+	    @PostMapping("/add")
+	    public ResponseEntity<String> addTask(@RequestBody ScheduledTask task) {
+	        taskRepository.save(task);
+	        schedulerService.scheduleTask(task);
+	        return ResponseEntity.ok("Task scheduled: " + task.getJobName());
+	    }
 	
-		public void scheduleTask(ScheduledTask task) {
-			if (scheduledTasks.containsKey(task.getId())) {
-				cancelTask(task.getId());
-			}
-	
-			ScheduledFuture<?> future = taskScheduler.schedule(() -> runJob(task), new CronTrigger(task.getCron()));
-	
-			scheduledTasks.put(task.getId(), future);
-		}
-	
-		public void cancelTask(String taskId) {
-			ScheduledFuture<?> future = scheduledTasks.remove(taskId);
-			if (future != null) {
-				future.cancel(true);
-			}
-			disableTask(taskId);
-		}
-	
-		public void deleteTask(String taskId) {
-			ScheduledFuture<?> future = scheduledTasks.remove(taskId);
-			if (future != null) {
-				future.cancel(true);
-			}
-			taskRepository.deleteById(taskId);
-		}
-	
-		public void disableTask(String taskId) {
-			taskRepository.findById(taskId).ifPresent(task -> {
-				task.setEnabled(false);
-				taskRepository.save(task);
-			});
-		}
-	
-		public void enableTask(String taskId) {
-			taskRepository.findById(taskId).ifPresent(task -> {
-				task.setEnabled(true);
-				taskRepository.save(task);
-			});
-		}
-	
-		public void startScheduleTask(String taskId) {
-			Optional<ScheduledTask> scheduledTask = taskRepository.findById(taskId);
-			if (scheduledTask.isPresent()) {
-				ScheduledTask task = scheduledTask.get();
-				scheduleTask(task);
-				enableTask(taskId);
-			} else {
-				System.out.println("해당 taskId를 가진 작업이 존재하지 않습니다.");
-			}
-	
-		}
-	
-		public void runJob(ScheduledTask task) {
-			System.out.println("Running task: " + task.getJobName() + " at " + new Date());
-			String beanName = task.getClassName();
-			String methodName = task.getMethodName();
-	
-			Object bean = applicationContext.getBean(beanName);
-			try {
-				// 파라미터 없는 메서드 실행
-				bean.getClass().getMethod(methodName).invoke(bean);
-			} catch (Exception e) {
-				throw new RuntimeException("Failed to invoke method", e);
-			}
-			task.setLastExecutedAt(new Date());
-			taskRepository.save(task);
-		}
+	    @PostMapping("/cancel/{id}")
+	    public ResponseEntity<String> cancel(@PathVariable String id) {
+	        schedulerService.cancelTask(id);
+	        return ResponseEntity.ok("Task canceled : " + id);
+	    }
+	    
+	    @PostMapping("/delete/{id}")
+	    public ResponseEntity<String> delete(@PathVariable String id) {
+	        schedulerService.deleteTask(id);
+	        return ResponseEntity.ok("Task delete : " + id);
+	    }
+	    
+	    @PostMapping("/start/{id}")
+	    public ResponseEntity<String> start(@PathVariable String id) {
+	        schedulerService.startScheduleTask(id);
+	        return ResponseEntity.ok("Task start : " + id);
+	    }
+	    @PostMapping("/list")
+	    public List<ScheduledTask> list() {
+	    	
+	        return taskRepository.findAll();
+	    }
 	}
+	
+
 	```
     - scheduler 생성시 body(json) 예제
     ```body
