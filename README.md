@@ -5,12 +5,12 @@
 공통 프레임웍팀에서 제공되는 API를 기반으로 사용할 수 있도록 가이드하고 표준화하는데 사용됩니다. <br><br>
 **FrameWork Archtecture 구성**<br>
 ![Alt Text](./emobi_framework.png)
+**1. 기본(내부) 구성**<br>
 
-1. 기본(내부) 구성
    - springboot(3.4.5)
    - java(1.8)
    
-   ex)설정 참조
+   ex)설정 참조(e-mobi > pom.xml)
    ```xml
    <parent>
 		<groupId>org.springframework.boot</groupId>
@@ -37,7 +37,7 @@
 		</dependency>
 	</dependencies>
    ```
-**주요 콤포넌트 구성**<br>
+**2. 제공 component module**<br>
 
 - com.emobi.emobi-common
 (common util) : 공통으로 사용되는 util 및 interface 구성 <br>
@@ -100,5 +100,44 @@
 (emobi email) : 이메일 발송 관리<br>
 
 - com.emobi.emobi-sms
-(emobi sms) : SMS 발송 관리<br>
+(emobi sms) : SMS 발송 관리<br><br><br>
+**3. 사용 방법**<br>
 
+   - component scan
+     ```xml
+     @ComponentScan(basePackages = {"com.emobi"})
+     ```
+   가. emobi-common(공통모듈)
+     - repository
+  	 ```repository
+     <repository>
+		<id>github</id><!-- 아무거나 적당히 -->
+		<url>https://maven.pkg.github.com/cybercorea1004/mobi</url>
+	 </repository>
+     ```
+     - yml 설정
+     ```yml
+	logging:
+	  config: classpath:logback-spring.xml
+	management:
+	  endpoints:
+	    web:
+	      exposure:
+	        include: loggers  # loggers 엔드포인트 공개
+
+	---
+	spring:
+	  config:
+	    activate:
+	      on-profile: local
+	  main:
+	    banner-mode: off
+    ```
+	- dependency
+    ```dependency
+	<dependency>
+		<groupId>com.emobi</groupId>
+		<artifactId>emobi-common</artifactId>
+		<version>0.0.1</version>
+	</dependency>
+     ```
