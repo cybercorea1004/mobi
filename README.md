@@ -94,7 +94,7 @@
 (emobi member) : 사용자 관리<br>
 
 - com.emobi.emobi-auth
-(emobi auth) : 사용자 권한 관리<br>
+(emobi auth) : 사용자 로그인 <br>
 
 - com.emobi.emobi-email
 (emobi email) : 이메일 발송 관리<br>
@@ -294,7 +294,7 @@
 	    "methodName" : "print"
 	}
     ```
-    나. emobi-member(사용자 관리)
+    다. emobi-member(사용자 관리)
      - dependency
      ```xml
 	<dependency>
@@ -384,5 +384,111 @@
 	    "email": "sunrise@emobi.kr",
 	    "password": "12345",
 	    "roles": ["USER"]
+	}
+    ```
+    라. emobi-auth(로그인 관리)
+     - dependency
+     ```xml
+	<dependency>
+		<groupId>com.emobi</groupId>
+		<artifactId>emobi-auth</artifactId>
+		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
+	</dependency>
+     ```
+     - Controller 예제
+    ```java
+
+	package com.emobi.ems;
+	
+	
+	import java.util.List;
+	import java.util.stream.Collectors;
+	
+	import org.springframework.http.ResponseEntity;
+	import org.springframework.security.authentication.AuthenticationManager;
+	import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import com.emobi.common.vo.Menu;
+	import com.emobi.user.member.dto.AuthRequest;
+	import com.emobi.user.member.dto.AuthResponse;
+	import com.emobi.user.menu.service.MenuService;
+	import com.emobi.user.security.service.CustomUserDetailsService;
+	import com.emobi.user.security.util.JwtUtil;
+	
+	import lombok.RequiredArgsConstructor;
+
+	@RequiredArgsConstructor
+	@RestController
+	@RequestMapping("/api/auth")
+	public class AuthController {
+	
+	    private final AuthenticationManager authManager;
+	    private final JwtUtil jwtUtil;
+	    private final CustomUserDetailsService userDetailsService;
+	    private final MenuService menuService;
+	
+	
+	    @PostMapping("/login")
+	    public ResponseEntity<?> login(@RequestBody AuthRequest req) {
+	        authManager.authenticate(
+	                new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword())
+	        );
+	        var userDetails = userDetailsService.loadUserByUsername(req.getUsername());
+	       
+	        List<String> roles = userDetails.getAuthorities().stream()
+	                .map(a -> a.getAuthority())
+	                .collect(Collectors.toList());
+	        
+	        List<String> menuIds = userDetails.getMenus();
+	        System.out.println(menuIds.size());
+	        List<Menu> menus = menuService.getMenuTree(menuIds); 
+	        String token = jwtUtil.generateAccessToken(userDetails.getUsername(), roles, menus);
+	        return ResponseEntity.ok(new AuthResponse(token, menus));
+	    }
+	}
+	```
+	- 로그인 시 response(json) 예제
+    ```res
+	{
+	    "token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzaGluMyIsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJtZW51cyI6W3siaWQiOiI3ZTViYTYwMTZlMjQ0NWJlYWU3YWY4OTYxYWIwZGIzYSIsIm5hbWUiOiJIb21lIiwicGF0aCI6Ii9ob21lIiwicGFyZW50SWQiOm51bGwsIm9yZGVyIjoxLCJjaGlsZHJlbiI6W119LHsiaWQiOiJhM2UxNmJhYjVlOGE0ZTY4OGMxYjk0MDExMTM4ZTQxNyIsIm5hbWUiOiJEYXNoYm9hcmQiLCJwYXRoIjoiL2Rhc2hib2FyZCIsInBhcmVudElkIjpudWxsLCJvcmRlciI6MiwiY2hpbGRyZW4iOltdfSx7ImlkIjoiYWUzMzRhMTFhN2ZhNDcxOGIwMWQxYmI3M2IwZWQ4NzUiLCJuYW1lIjoiU2V0dGluZ3MiLCJwYXRoIjoiL3NldHRpbmdzIiwicGFyZW50SWQiOm51bGwsIm9yZGVyIjozLCJjaGlsZHJlbiI6W3siaWQiOiJkOThjYWE2YjIyOWY0ZmNjYWFkNWI1ZjkwZTUxMDYzNSIsIm5hbWUiOiJVc2VyIE1hbmFnZW1lbnQiLCJwYXRoIjoiL3VzZXJzIiwicGFyZW50SWQiOiJhZTMzNGExMWE3ZmE0NzE4YjAxZDFiYjczYjBlZDg3NSIsIm9yZGVyIjoxLCJjaGlsZHJlbiI6W119XX1dLCJpYXQiOjE3NTU2NDc0NTYsImV4cCI6MTc1NTY1MTA1Nn0.59J-AcR65lVnEifmawQhYiQ5aArm7bG-IxL-81chJyxW113hYm5MsoavIqTdIu-EeamlMUAhENvH3pKKTggLpw",
+	    "menus": [
+	        {
+	            "id": "7e5ba6016e2445beae7af8961ab0db3a",
+	            "name": "Home",
+	            "path": "/home",
+	            "parentId": null,
+	            "order": 1,
+	            "children": []
+	        },
+	        {
+	            "id": "a3e16bab5e8a4e688c1b94011138e417",
+	            "name": "Dashboard",
+	            "path": "/dashboard",
+	            "parentId": null,
+	            "order": 2,
+	            "children": []
+	        },
+	        {
+	            "id": "ae334a11a7fa4718b01d1bb73b0ed875",
+	            "name": "Settings",
+	            "path": "/settings",
+	            "parentId": null,
+	            "order": 3,
+	            "children": [
+	                {
+	                    "id": "d98caa6b229f4fccaad5b5f90e510635",
+	                    "name": "User Management",
+	                    "path": "/users",
+	                    "parentId": "ae334a11a7fa4718b01d1bb73b0ed875",
+	                    "order": 1,
+	                    "children": []
+	                }
+	            ]
+	        }
+	    ]
 	}
     ```
