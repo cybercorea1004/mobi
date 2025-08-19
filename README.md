@@ -206,7 +206,137 @@
 	<dependency>
 		<groupId>com.emobi</groupId>
 		<artifactId>emobi-common</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
 	</dependency>
      ```
    나. emobi-scheduler(공통모듈)
+     - dependency
+     ```xml
+	<dependency>
+		<groupId>com.emobi</groupId>
+		<artifactId>emobi-scheduler</artifactId>
+		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
+	</dependency>
+     ```
+     - 시작시 Annotation
+       ```
+       @EnableScheduling
+       ```
+       : web 실행시 자동 실행됨
+     - Controller 예제
+    ```java
+	import java.util.Date;
+	import java.util.List;
+	import java.util.Map;
+	import java.util.Optional;
+	import java.util.concurrent.ConcurrentHashMap;
+	import java.util.concurrent.ScheduledFuture;
+	
+	import org.springframework.context.ApplicationContext;
+	import org.springframework.scheduling.TaskScheduler;
+	import org.springframework.scheduling.support.CronTrigger;
+	import org.springframework.stereotype.Service;
+	
+	import com.emobi.common.vo.ScheduledTask;
+	import com.emobi.scheduler.repository.ScheduledTaskRepository;
+	
+	import jakarta.annotation.PostConstruct;
+	import lombok.RequiredArgsConstructor;
+	
+	@RequiredArgsConstructor
+	@Service
+	public class DynamicSchedulerService {
+	
+		private final ScheduledTaskRepository taskRepository;
+		private final TaskScheduler taskScheduler;
+		private final ApplicationContext applicationContext;
+		private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+	
+		@PostConstruct
+		public void init() {
+			List<ScheduledTask> tasks = taskRepository.findByEnabledTrue();
+			for (ScheduledTask task : tasks) {
+				scheduleTask(task);
+			}
+		}
+	
+		public void scheduleTask(ScheduledTask task) {
+			if (scheduledTasks.containsKey(task.getId())) {
+				cancelTask(task.getId());
+			}
+	
+			ScheduledFuture<?> future = taskScheduler.schedule(() -> runJob(task), new CronTrigger(task.getCron()));
+	
+			scheduledTasks.put(task.getId(), future);
+		}
+	
+		public void cancelTask(String taskId) {
+			ScheduledFuture<?> future = scheduledTasks.remove(taskId);
+			if (future != null) {
+				future.cancel(true);
+			}
+			disableTask(taskId);
+		}
+	
+		public void deleteTask(String taskId) {
+			ScheduledFuture<?> future = scheduledTasks.remove(taskId);
+			if (future != null) {
+				future.cancel(true);
+			}
+			taskRepository.deleteById(taskId);
+		}
+	
+		public void disableTask(String taskId) {
+			taskRepository.findById(taskId).ifPresent(task -> {
+				task.setEnabled(false);
+				taskRepository.save(task);
+			});
+		}
+	
+		public void enableTask(String taskId) {
+			taskRepository.findById(taskId).ifPresent(task -> {
+				task.setEnabled(true);
+				taskRepository.save(task);
+			});
+		}
+	
+		public void startScheduleTask(String taskId) {
+			Optional<ScheduledTask> scheduledTask = taskRepository.findById(taskId);
+			if (scheduledTask.isPresent()) {
+				ScheduledTask task = scheduledTask.get();
+				scheduleTask(task);
+				enableTask(taskId);
+			} else {
+				System.out.println("해당 taskId를 가진 작업이 존재하지 않습니다.");
+			}
+	
+		}
+	
+		public void runJob(ScheduledTask task) {
+			System.out.println("Running task: " + task.getJobName() + " at " + new Date());
+			String beanName = task.getClassName();
+			String methodName = task.getMethodName();
+	
+			Object bean = applicationContext.getBean(beanName);
+			try {
+				// 파라미터 없는 메서드 실행
+				bean.getClass().getMethod(methodName).invoke(bean);
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to invoke method", e);
+			}
+			task.setLastExecutedAt(new Date());
+			taskRepository.save(task);
+		}
+	}
+	```
+    - scheduler 생성시 body(json) 예제
+    ```body
+    {
+	    "id" : "a05",
+	    "jobName" : "shin4",
+	    "cron" : "*/10 * * * * ?",
+	    "enabled" : true,
+	    "className" : "runTestService",
+	    "methodName" : "print"
+	}
+    ```
