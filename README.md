@@ -209,7 +209,7 @@
 		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
 	</dependency>
      ```
-   나. emobi-scheduler
+   나. emobi-scheduler(다이나믹 스케쥴러 관리)
      - dependency
      ```xml
 	<dependency>
@@ -294,7 +294,7 @@
 	    "methodName" : "print"
 	}
     ```
-    나. emobi-member
+    나. emobi-member(사용자 관리)
      - dependency
      ```xml
 	<dependency>
@@ -378,3 +378,11 @@
 	    }
 	}
 	```
+	- 사용자 생성시 body(json) 예제
+    ```body
+    {
+	    "username": "shin4",
+	    "email": "sunrise@emobi.kr",
+	    "password": "12345"
+	}
+    ```
