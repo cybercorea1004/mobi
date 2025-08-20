@@ -209,6 +209,71 @@
 		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
 	</dependency>
      ```
+    - 다국어 메세지 처리 예제(java 에서 사용방법)
+     ```message
+	package com.emobi.ems;
+	
+	import lombok.RequiredArgsConstructor;
+	import org.springframework.context.MessageSource;
+	import org.springframework.web.bind.annotation.GetMapping;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RequestParam;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import java.util.Locale;
+	
+	/**
+	* <pre>
+	* simple : .
+	* detail : .
+	* com.emobi
+	* |_ GreetingController.java
+	* </pre>
+	*
+	* @company : Mobi Co., Ltd.
+	* @author : emobi
+	* @date : 2025. 8. 13. 오후 2:51:03
+	* @version : 1.0
+	* @History :
+	* name : date : document : content
+	* ------------------------------------------------------
+	* emobi : 2025. 8. 13. : : new.
+	*/
+	
+	
+	@RestController
+	@RequiredArgsConstructor
+	@RequestMapping("/message")
+	public class GreetingController {
+	
+	    private final MessageSource messageSource;
+	
+	    @GetMapping("/greeting")
+	    public String greeting(@RequestParam(defaultValue = "ko") String lang) {
+	        Locale locale = Locale.forLanguageTag(lang);
+	        return messageSource.getMessage("greeting", null, locale);
+	    }
+	
+	    @GetMapping("/welcome")
+	    public String welcome(@RequestParam String name,
+	                          @RequestParam(defaultValue = "ko") String lang) {
+	        Locale locale = Locale.forLanguageTag(lang);
+	        return messageSource.getMessage("welcome.message", new Object[]{name}, locale);
+	    }
+	}     
+    ```
+   파일 예제 <br>
+   ![Alt Text](./resources_message.png) <br>
+   한글(messages_ko.properties) <br>
+    ```ko
+    greeting=안녕하세요
+	welcome.message=환영합니다, {0}님!
+    ```
+    영문(messages_en.properties) <br>
+    ```ko
+    greeting=Hello
+	welcome.message=Welcome, {0}!
+    ```
    나. emobi-scheduler(다이나믹 스케쥴러 관리)
      - dependency
      ```xml
