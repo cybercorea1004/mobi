@@ -634,3 +634,174 @@
 	    "parentId":"a0513cfe293849a9a5f54775df51f271" //루트 메뉴일 경우 생략
 	}
     ```
+	마. emobi-device(device 관리)
+	 - dependency
+	 ```xml
+	<dependency>
+		<groupId>com.emobi</groupId>
+		<artifactId>emobi-device</artifactId>
+		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
+	</dependency>
+     - device > device group > bms > pms
+	 ```
+	 - Controller 예제(device / device group / bms / pms)
+	```device
+	package com.emobi.ems;
+	
+	import java.util.List;
+	
+	import org.springframework.web.bind.annotation.PathVariable;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import com.emobi.device.service.DeviceService;
+	import com.emobi.device.vo.Device;
+	
+	import lombok.RequiredArgsConstructor;
+	
+	@RequiredArgsConstructor
+	@RestController
+	@RequestMapping("/api/devices")
+	public class DeviceController {
+	
+	    private final DeviceService service;
+	
+	    @PostMapping("/create")
+	    public Device registerDevice(@RequestBody Device device) {
+	        return service.registerDevice(device);
+	    }
+	
+	    @PostMapping("/update")
+	    public Device updateDevice(@RequestBody Device device) {
+	        return service.updateDevice(device);
+	    }
+	
+	    @PostMapping("/list")
+	    public List<Device> getAllDevices() {
+	        return service.getAllDevices();
+	    }
+	
+	    @PostMapping("/status/{status}")
+	    public List<Device> getDevicesByStatus(@PathVariable String status) {
+	        return service.getDevicesByStatus(status);
+	    }
+	}
+ 	```
+    ```devicegrp
+
+	package com.emobi.ems;
+	
+	import java.util.List;
+	import java.util.Map;
+	
+	import org.springframework.web.bind.annotation.GetMapping;
+	import org.springframework.web.bind.annotation.PathVariable;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import com.emobi.device.vo.Device;
+	import com.emobi.devicegrp.service.DeviceGroupService;
+	import com.emobi.devicegrp.vo.DeviceGroup;
+	
+	import lombok.RequiredArgsConstructor;
+	
+
+	@RequiredArgsConstructor
+	@RestController
+	@RequestMapping("/api/devicegroups")
+	public class DeviceGroupController {
+	    private final DeviceGroupService service;
+	
+	    @PostMapping("/create")
+	    public DeviceGroup createGroup(@RequestBody DeviceGroup deviceGroup) {
+	        return service.createGroup(deviceGroup);
+	    }
+	
+	    @PostMapping("/add")
+	    public DeviceGroup addDevice(@RequestBody Map<String, Object> addDevice) {
+	        return service.addDeviceToGroup(addDevice.get("groupId")+"", addDevice.get("deviceId")+"");
+	    }
+	
+	    @GetMapping("/devices")
+	    public List<Device> listDevices(@RequestBody Map<String, Object> addDevice) {
+	        return service.getDevicesInGroup(addDevice.get("groupId")+"");
+	    }
+	}
+ 	```
+    ```bms
+	package com.emobi.ems;
+	
+	import java.util.Map;
+	
+	import org.springframework.http.ResponseEntity;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import com.emobi.bms.service.BmsGroupService;
+	import com.emobi.bms.vo.BmsGroup;
+	
+	import lombok.RequiredArgsConstructor;
+	
+	@RequiredArgsConstructor
+	@RestController
+	@RequestMapping("/api/bms")
+	public class BmsController {
+	
+	    private final BmsGroupService bmsService;
+	
+	    // BMS 초기 등록
+	    @PostMapping("create")
+	    public ResponseEntity<BmsGroup> createBms(@RequestBody BmsGroup bms) {
+	        return ResponseEntity.ok(bmsService.createBms(bms));
+	    }
+	
+	    // BMS 에 DeviceGroup 추가
+	    @PostMapping("/device-groups/add")
+	    public ResponseEntity<BmsGroup> addGroupToBms(@RequestBody Map<String, Object> bmsGroups) {
+	        return ResponseEntity.ok(bmsService.addDeviceGroupToBms(bmsGroups.get("bmsId")+"", bmsGroups.get("groupId")+""));
+	    }
+	}
+ 	```
+	```pms
+
+	package com.emobi.ems;
+	
+	import java.util.Map;
+	
+	import org.springframework.beans.factory.annotation.Autowired;
+	import org.springframework.http.ResponseEntity;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import com.emobi.pms.service.PMSService;
+	import com.emobi.pms.vo.PmsGroup;
+	
+	import lombok.RequiredArgsConstructor;
+	
+	@RequiredArgsConstructor
+	@RestController
+	@RequestMapping("/api/pms")
+	public class PmsController {
+	
+	    @Autowired
+	    private PMSService pmsService;
+	
+	    @PostMapping("/create")
+	    public ResponseEntity<PmsGroup> createPms(@RequestBody PmsGroup pms) {
+	        return ResponseEntity.ok(pmsService.createPms(pms));
+	    }
+	    @PostMapping("/bms/add")
+	    public ResponseEntity<PmsGroup> moveBms(@RequestBody Map<String, Object> pmsGroups) {
+	        return ResponseEntity.ok(pmsService.moveBmsToPms(pmsGroups.get("pmsId")+"", pmsGroups.get("bmsId")+""));
+	    }
+	}
+
+ 	```
