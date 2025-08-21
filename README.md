@@ -535,6 +535,13 @@
 		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
 	</dependency>
      ```
+     - yml 추가 예제
+    ```auth_yml
+    jwt:
+	  secret: "replace_this_with_a_very_long_random_secret_at_least_256_bits_long!"
+	  access-expiration-ms: 3600000 # 1 hour
+	  refresh-expiration-ms: 604800000  # 7 days
+    ```
      - Controller 예제
     ```java
 
