@@ -274,6 +274,81 @@
     greeting=Hello
 	welcome.message=Welcome, {0}!
     ```
+    - 공통코드 관리
+     ```common
+	import java.util.HashMap;
+	import java.util.List;
+	import java.util.Map;
+	
+	import org.springframework.web.bind.annotation.GetMapping;
+	import org.springframework.web.bind.annotation.PostMapping;
+	import org.springframework.web.bind.annotation.RequestBody;
+	import org.springframework.web.bind.annotation.RequestMapping;
+	import org.springframework.web.bind.annotation.RestController;
+	
+	import com.emobi.common.code.service.CodeService;
+	import com.emobi.common.code.vo.CodeGroup;
+	import com.emobi.common.code.vo.CodeItem;
+	
+	import lombok.RequiredArgsConstructor;
+	
+	@RestController
+	@RequestMapping("/api/codes")
+	@RequiredArgsConstructor
+	public class CodeController {
+	
+	    private final CodeService codeService;
+	
+	    // ------------------------
+	    // 그룹 관리
+	    // ------------------------
+	    @PostMapping("/groups/create")
+	    public CodeGroup createGroup(@RequestBody CodeGroup group) {
+	        return codeService.createGroup(group);
+	    }
+	
+	    @PostMapping("/groups/update")
+	    public CodeGroup updateGroup(@RequestBody CodeGroup group) {
+	        return codeService.updateGroup(group);
+	    }
+	
+	    @PostMapping("/groups/delete")
+	    public void deleteGroup(@RequestBody HashMap<String, Object> group) {
+	        codeService.deleteGroup(group.get("groupCode")+"");
+	    }
+	
+	    // ------------------------
+	    // 아이템 관리
+	    // ------------------------
+	    @PostMapping("/items/create")
+	    public CodeItem createItem(@RequestBody CodeItem item) {
+	        return codeService.createItem(item);
+	    }
+	
+	    @PostMapping("/items/update")
+	    public CodeItem updateItem(@RequestBody CodeItem item) {
+	        return codeService.updateItem(item);
+	    }
+	
+	    @PostMapping("/items/delete")
+	    public void deleteItem(@RequestBody HashMap<String, Object> item) {
+	        codeService.deleteItem(item.get("id")+"");
+	    }
+	
+	    // ------------------------
+	    // 조회
+	    // ------------------------
+	    @PostMapping("/groups/list")
+	    public List<CodeItem> getCodes(@RequestBody HashMap<String, Object> groups) {
+	        return codeService.getCodeItems(groups.get("groupCode")+"");
+	    }
+	
+	    @GetMapping("/all")
+	    public Map<String, List<CodeItem>> getAllCodes() {
+	        return codeService.getAllCodes();
+	    }
+	}   
+    ```
    나. emobi-scheduler(다이나믹 스케쥴러 관리)
      - dependency
      ```xml
@@ -642,8 +717,9 @@
 		<artifactId>emobi-device</artifactId>
 		<version>0.0.1{-SNAPSHOT}</version> <!-- 필요 버전으로 변경 : 현재 개발 버전 -->
 	</dependency>
+  	 ```
      - device > device group > bms > pms
-	 ```
+
 	 - Controller 예제(device / device group / bms / pms)
 	```device
 	package com.emobi.ems;
